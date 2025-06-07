@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "nodemon -x \"node --import ts-node/esm src/index.ts\"",
-		"start": "node dist/index.js",
+		"start": "node dist/src/index.js",
 		"build": "tsc",
 		"prod": "npm run build && npm start"
 	},
