@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import type { Request, Response } from 'express';
-import { notes, noteRouter } from './routes/note.routes';
+import { notes, noteRouter } from './routes/note.routes.js';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
