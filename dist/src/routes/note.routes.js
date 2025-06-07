@@ -1,5 +1,5 @@
 import { Router } from 'express';
-export let notes = [
+let notes = [
     {
         id: '1',
         content: 'HTML is easy',
@@ -16,7 +16,7 @@ export let notes = [
         important: true,
     },
 ];
-export const noteRouter = Router();
+const noteRouter = Router();
 noteRouter.get('/', (req, res) => {
     res.send(notes);
 });
@@ -48,3 +48,4 @@ noteRouter.delete('/:id', (req, res) => {
     notes = notes.filter((note) => note.id !== id);
     res.status(204).end();
 });
+export default noteRouter;
