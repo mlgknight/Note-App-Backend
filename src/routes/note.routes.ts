@@ -1,63 +1,85 @@
 import { Router } from 'express';
-import type { Request, Response } from 'express';
-type Note = {
-	id: string;
-	content: string;
-	important: boolean;
-};
+import type { Request, Response, NextFunction } from 'express';
+import Note from '../../models/Note.ts';
 
-export let notes: Note[] = [
-	{
-		id: '1',
-		content: 'HTML is easy',
-		important: true,
-	},
-	{
-		id: '2',
-		content: 'Browser can execute only JavaScript',
-		important: false,
-	},
-	{
-		id: '3',
-		content: 'GET and POST are the most important methods of HTTP protocol',
-		important: true,
-	},
-];
+const noteRouter = Router();
 
-export const noteRouter = Router();
-
-noteRouter.get('/', (req: Request, res: Response) => {
-	res.send(notes);
-});
-
-noteRouter.post('/', (req: Request, res: Response) => {
-	if (!req.body.content) {
-		return res.status(400).json({
-			error: 'content missing',
-		});
-	}
-	const note = {
-		id: String(notes.length + 1),
-		...req.body,
-	};
-	notes = notes.concat(note);
-	res.json(note);
-});
-
-noteRouter.get('/:id', (req: Request, res: Response) => {
-	const id = req.params.id;
-	const note = notes.find((note) => note.id === id);
-
-	if (note) {
-		res.send(note);
-	} else {
-		res.status(404).end();
+noteRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const notes = await Note.find({});
+		res.json(notes);
+	} catch (error) {
+		next(error);
 	}
 });
 
-noteRouter.delete('/:id', (req: Request, res: Response) => {
-	const id = req.params.id;
-	notes = notes.filter((note) => note.id !== id);
+noteRouter.post(
+	'/',
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			if (!req.body.content) {
+				return res.status(400).json({ error: 'content missing' });
+			}
+			const note = new Note({
+				content: req.body.content,
+				important: req.body.important ?? false,
+			});
+			const newNote = await note.save();
+			res.json(newNote);
+		} catch (error) {
+			next(error);
+		}
+	}
+);
 
-	res.status(204).end();
-});
+noteRouter.get(
+	'/:id',
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const note = await Note.findById(req.params.id);
+			if (note) {
+				res.json(note);
+			} else {
+				res.status(404).end();
+			}
+		} catch (error) {
+			next(error);
+		}
+	}
+);
+
+noteRouter.delete(
+	'/:id',
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			await Note.findByIdAndDelete(req.params.id);
+			res.status(204).end();
+		} catch (error) {
+			next(error);
+		}
+	}
+);
+
+noteRouter.put(
+	'/:id',
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { content, important } = req.body;
+
+		try {
+			const noteToUpdate = await Note.findById(req.params.id);
+			if (!noteToUpdate) {
+				return res.status(404).end();
+			}
+
+			noteToUpdate.content = content;
+			noteToUpdate.important = important;
+
+			const updatedNote = await noteToUpdate.save();
+			return res.json(updatedNote);
+		} catch (error) {
+			next(error);
+		}
+	}
+);
+
+export default noteRouter;
