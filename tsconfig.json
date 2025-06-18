@@ -1,19 +1,23 @@
 {
 	"compilerOptions": {
-		"target": "es2020",
-		"module": "esnext",
 		"outDir": "./dist",
-		"rootDir": "./",
-		"strict": true,
 		"esModuleInterop": true,
-		"allowSyntheticDefaultImports": true,
-		"skipLibCheck": true,
 		"forceConsistentCasingInFileNames": true,
-		"moduleResolution": "node",
+		"strict": true,
 		"resolveJsonModule": true,
-		"noEmit": true,
-		"allowImportingTsExtensions": true
+		"skipLibCheck": true,
+		"paths": {
+			"@config/*": ["./src/config/*"],
+			"@controllers/*": ["./src/controllers/*"],
+			"@middlewares/*": ["./src/middlewares/*"],
+			"@validators/*": ["./src/validators/*"],
+			"@routes/*": ["./src/routes/*"],
+			"@models/*": ["./src/models/*"],
+			"@services/*": ["./src/services/*"],
+			"@logger/*": ["./src/logging/*"],
+			"@utils/*": ["./src/utils/*"],
+			"@projTypes/*": ["./src/types/*"]
+		}
 	},
-	"include": ["**/*.ts", "mongo.js"],
-	"exclude": ["node_modules", "dist"]
+	"exclude": ["**/*.test.ts"]
 }
