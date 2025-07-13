@@ -1,6 +1,15 @@
 import type { Request, Response } from 'express';
 import Note from '../models/Note.ts';
 import User from '../models/User.ts';
+import jwt from 'jsonwebtoken';
+
+const getTokenFrom = (req: Request): string => {
+	const authorization = req.get('authorization');
+	if (authorization && authorization.startsWith('Bearer ')) {
+		return authorization.replace('Bearer ', '');
+	}
+	throw new Error('Token missing');
+};
 
 export const getAllNotes = async (req: Request, res: Response) => {
 	const notes = await Note.find({}).populate('user', { username: 1, name: 1 });
@@ -17,10 +26,24 @@ export const getSingleNote = async (req: Request, res: Response) => {
 };
 
 export const addNewNote = async (req: Request, res: Response) => {
-	const { content, important, userId } = req.body;
+	interface DecodedToken extends jwt.JwtPayload {
+		id: string;
+	}
+	const { content, important } = req.body;
 
-	const user = await User.findById(userId);
+	const secret = process.env.SECRET;
+	if (!secret) {
+		return res
+			.status(500)
+			.json({ error: 'SECRET key is missing from environment variables' });
+	}
 
+	const decodedToken = jwt.verify(getTokenFrom(req), secret) as DecodedToken;
+
+	if (!decodedToken.id) {
+		return res.status(401).json({ error: 'token invalid' });
+	}
+	const user = await User.findById(decodedToken.id);
 
 	if (!user) {
 		return res.status(400).json({ error: 'userId missing or not valid' });
@@ -32,7 +55,7 @@ export const addNewNote = async (req: Request, res: Response) => {
 	const note = new Note({
 		content,
 		important: important || false,
-    user: user._id,
+		user: user._id,
 	});
 	const savedNote = await note.save();
 	user.notes = user.notes.concat(savedNote.id);
