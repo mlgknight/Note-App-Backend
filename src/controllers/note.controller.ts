@@ -12,7 +12,9 @@ const getTokenFrom = (req: Request): string => {
 };
 
 export const getAllNotes = async (req: Request, res: Response) => {
-	const notes = await Note.find({}).populate('user', { username: 1, name: 1 });
+	const notes = await Note.find({})
+		.populate('user', { username: 1, name: 1 })
+		.sort({ _id: -1 });
 	res.json(notes);
 };
 

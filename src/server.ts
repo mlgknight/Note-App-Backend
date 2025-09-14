@@ -1,3 +1,4 @@
+import 'express-async-errors';
 import app from '../src/app.ts';
 import { PORT } from './utils/config.ts';
 import logger from './utils/logger.ts';
